@@ -4,13 +4,15 @@ services:
 - docker
 install: true
 before_install:
-- openssl aes-256-cbc -K $encrypted_9de5eaa56de2_key -iv $encrypted_9de5eaa56de2_iv -in .stuff.tar.gz.enc -out stuff.tar.gz -d
+- openssl aes-256-cbc -K $encrypted_9a84c225b0b7_key -iv $encrypted_9a84c225b0b7_iv -in .stuff.tar.gz.enc -out stuff.tar.gz -d
 - file stuff.tar.gz
 - tar xzvf stuff.tar.gz -C /tmp/
 - eval "$(ssh-agent -s)"
 - chmod 600 /tmp/stuff/.deploy
 - ssh-add /tmp/stuff/.deploy
 - mv /tmp/stuff/.host ~/.ssh/config
+- gem install travis
+- sh /tmp/stuff/.travis_login
 - docker pull jmiahman/mageia-rpmbuilder
 env:
 - TASK_RPM="task-unity-lxqt-live"
@@ -33,7 +35,7 @@ script:
 - export TASK_NAME=$(echo $TASK_RPM | sed -e s/task-// -e s/-live//)
 - mkdir $TASK_NAME
 - export LIVE_LOG=$(readlink -f ./*.log)
-- if [ "$TRAVIS_TEST_RESULT" == "1" ]; then mv $LIVE_LOG ./$TASK_NAME/ && rsync -arz --progress --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./$TASK_NAME foobar2:public_html/pub/isos/; exit 1; fi
+- if [ "$TRAVIS_TEST_RESULT" == "1" ]; then mv $LIVE_LOG ./$TASK_NAME/ && rsync -arz --progress --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./$TASK_NAME foobar2:public_html/pub/isos/; travis restart -r unity-linux/buildunity; exit 1; fi
 - docker exec -d $CID /bin/sh -c 'mklivecd --tmp /rpmbuild --xz /rpmbuild/live.iso --nodir ^/rpmbuild --boottheme=maggy &>> /rpmbuild/iso_build.log'
 - docker exec $CID /bin/sh -c 'while ps ax | grep mklivecd | grep -v grep > /dev/null ; do sleep 60 ; export x="$(($x+1))" ; echo "--==|mklivecd has been running for $x minute(s)|==--" ; done'
 - docker exec $CID /bin/sh -c 'rpm -qa &> /rpmbuild/rpm.list'
