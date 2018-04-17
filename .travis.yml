@@ -37,7 +37,7 @@ script:
 - export TASK_NAME=$(echo $TASK_RPM | sed -e s/task-// -e s/-live//)
 - mkdir -p ${TASK_NAME}/${ARCH}
 - export LIVE_LOG=$(readlink -f ./*.log)
-- if [ "$TRAVIS_TEST_RESULT" == "1" ]; then mv $LIVE_LOG ./$TASK_NAME/ && rsync -arz --progress --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./$TASK_NAME foobar2:public_html/pub/isos/; travis restart -r unity-linux/buildunity; exit 1; fi
+- if [ "$TRAVIS_TEST_RESULT" == "1" ]; then mv $LIVE_LOG ./${TASK_NAME}/${ARCH}/FAILED_BUILD.log && rsync -arz --progress --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./${TASK_NAME}/${ARCH} foobar2:public_html/pub/isos/; travis restart -r unity-linux/buildunity; exit 1; fi
 - docker exec -d $CID /bin/sh -c 'mklivecd --tmp /rpmbuild --xz /rpmbuild/live.iso --nodir ^/rpmbuild --boottheme=Unity-Default &>> /rpmbuild/iso_build.log'
 - docker exec $CID /bin/sh -c 'while ps ax | grep mklivecd | grep -v grep > /dev/null ; do sleep 60 ; export x="$(($x+1))" ; echo "--==|mklivecd has been running for $x minute(s)|==--" ; done'
 - docker exec $CID /bin/sh -c 'rpm -qa &> /rpmbuild/rpm.list'
