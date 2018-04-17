@@ -51,7 +51,7 @@ script:
 - export NEW_ISO=$(readlink -f ./$TASK_NAME/*.iso)
 - echo "$NEW_ISO"
 - md5sum "$NEW_ISO" > ./$TASK_NAME/$(basename "$NEW_ISO").md5
-- if [ "$TRAVIS_TEST_RESULT" == "1" ]; then rsync -arz --progress --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./${TASK_NAME}/${ARCH} foobar2:public_html/pub/isos/; fi
+- if [ "$TRAVIS_TEST_RESULT" == "1" ]; then rsync -arz --progress --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./ foobar2:public_html/pub/isos/; fi
 after_success:
 - rsync -arz --progress --delete --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./$TASK_NAME/${ARCH} foobar2:public_html/pub/isos/ &
 - rsync -arz --progress --delete --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./$TASK_NAME/${ARCH} foobar:/var/www/html/isos/ &
