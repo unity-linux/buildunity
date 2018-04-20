@@ -37,7 +37,7 @@ script:
 - if [ "$TASK_RPM" == "task-unity-enlightenment-live" ]; then export taskcmd='dnf install --setopt=install_weak_deps=False task-unity-enlightenment-live -y &>> /rpmbuild/iso_build.log'; fi
 - echo "$taskcmd"
 - docker exec $CID /bin/sh -c "$taskcmd"
-- docker exec $CID /bin/sh -c 'dnf remove glibc-devel -y &>> /rpmbuild/iso_build.log'
+  #- docker exec $CID /bin/sh -c 'dnf remove glibc-devel -y &>> /rpmbuild/iso_build.log'
 - docker exec $CID /bin/sh -c 'dnf update --setopt=install_weak_deps=False -y &>> /rpmbuild/iso_build.log'
 - docker exec $CID /bin/sh -c 'dnf clean all &>> /rpmbuild/iso_build.log'
 - export TASK_NAME=$(echo $TASK_RPM | sed -e s/task-// -e s/-live//)
