@@ -18,6 +18,7 @@ env:
 - TASK_FULL="task-unity-lxqt-live-x86_64"
 script:
 - TASK_RPM=$(echo $TASK_FULL | cut -d- -f1-4)
+- TASK_NAME=$(echo $TASK_FULL | cut -d- -f3-5)
 - ARCH=$(echo $TASK_FULL | cut -d- -f5)
 - docker pull jmiahman/mageia-rpmbuilder-${ARCH}
 - export DID=$(docker images -a | grep -m1 mageia-rpmbuilder | awk '{print $3}')
@@ -40,23 +41,22 @@ script:
   #- docker exec $CID /bin/sh -c 'dnf remove glibc-devel -y &>> /rpmbuild/iso_build.log'
 - docker exec $CID /bin/sh -c 'dnf update --setopt=install_weak_deps=False -y &>> /rpmbuild/iso_build.log'
 - docker exec $CID /bin/sh -c 'dnf clean all &>> /rpmbuild/iso_build.log'
-- export TASK_NAME=$(echo $TASK_RPM | sed -e s/task-// -e s/-live//)
-- mkdir -p ${TASK_NAME}/${ARCH}
+- mkdir -p ${TASK_NAME}
 - export LIVE_LOG=$(readlink -f ./*.log)
-- if [ "$TRAVIS_TEST_RESULT" == "1" ]; then mv $LIVE_LOG ./${TASK_NAME}/${ARCH}/FAILED_BUILD.log && rsync -arz --progress --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./${TASK_NAME} foobar2:public_html/pub/isos/; travis restart -r unity-linux/buildunity; exit 1; fi
+- if [ "$TRAVIS_TEST_RESULT" == "1" ]; then mv $LIVE_LOG ./${TASK_NAME}/FAILED_BUILD.log && rsync -arz --progress --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./${TASK_NAME} foobar2:public_html/pub/isos/; travis restart -r unity-linux/buildunity; exit 1; fi
 - docker exec -d $CID /bin/sh -c 'mklivecd --tmp /rpmbuild --xz /rpmbuild/live.iso --nodir ^/rpmbuild --boottheme=Unity-Default &>> /rpmbuild/iso_build.log'
 - docker exec $CID /bin/sh -c 'while ps ax | grep mklivecd | grep -v grep > /dev/null ; do sleep 60 ; export x="$(($x+1))" ; echo "--==|mklivecd has been running for $x minute(s)|==--" ; done'
 - docker exec $CID /bin/sh -c 'rpm -qa &> /rpmbuild/rpm.list'
 - export LIVE_ISO=$(readlink -f ./*.iso)
 - export RPM_LIST=$(readlink -f ./rpm.list)
-- mv $LIVE_ISO ./$TASK_NAME/${ARCH}/${TASK_NAME}-${ARCH}-$(date +%Y%m%d%H).iso
-- mv $LIVE_LOG ./$TASK_NAME/${ARCH}/${TASK_NAME}-${ARCH}-$(date +%Y%m%d%H).log
-- mv $RPM_LIST ./$TASK_NAME/${ARCH}/${TASK_NAME}-${ARCH}-$(date +%Y%m%d%H).rpmlist
+- mv $LIVE_ISO ./$TASK_NAME/${TASK_NAME}-$(date +%Y%m%d%H).iso
+- mv $LIVE_LOG ./$TASK_NAME/${TASK_NAME}-$(date +%Y%m%d%H).log
+- mv $RPM_LIST ./$TASK_NAME/${TASK_NAME}-$(date +%Y%m%d%H).rpmlist
 - export NEW_ISO=$(readlink -f ./$TASK_NAME/*.iso)
 - echo "$NEW_ISO"
 - md5sum "$NEW_ISO" > ./$TASK_NAME/$(basename "$NEW_ISO").md5
 - if [ "$TRAVIS_TEST_RESULT" == "1" ]; then rsync -arz --progress --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./$TASK_NAME foobar2:public_html/pub/isos/; fi
 after_success:
-- rsync -arz --progress --delete --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./$TASK_NAME/${ARCH} foobar2:public_html/pub/isos/ &
-- rsync -arz --progress --delete --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./$TASK_NAME/${ARCH} foobar:/var/www/html/isos/ &
+- rsync -arz --progress --delete --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./$TASK_NAME foobar2:public_html/pub/isos/ &
+- rsync -arz --progress --delete --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./$TASK_NAME foobar:/var/www/html/isos/ &
 - wait %1 %2
