@@ -38,7 +38,7 @@ script:
 - docker exec $CID /bin/sh -c "$taskcmd"
 - docker exec $CID /bin/sh -c 'dnf update --setopt=install_weak_deps=False -y &>> /rpmbuild/iso_build.log'
 # mtools conflicts with mklivecd/grub2-mkrescue
-- docker exec $CID /bin/sh -c 'dnf -y remove mtools glibc-devel &>> /rpmbuild/iso_build.log'
+- docker exec $CID /bin/sh -c 'dnf -y remove mtools &>> /rpmbuild/iso_build.log'
 - docker exec $CID /bin/sh -c 'dnf clean all &>> /rpmbuild/iso_build.log'
 - mkdir -p ${TASK_NAME}
 - export LIVE_LOG=$(readlink -f ./*.log)
