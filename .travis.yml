@@ -40,7 +40,7 @@ script:
 # mtools conflicts with mklivecd/grub2-mkrescue
 - docker exec $CID /bin/sh -c 'dnf -y remove mtools &>> /rpmbuild/iso_build.log'
 - docker exec $CID /bin/sh -c 'dnf clean all &>> /rpmbuild/iso_build.log'
-- docker exec $CID /bin/sh -c 'echo "---Checks---" && rpm -qa | grep glibc && rpm -qa | grep mtools && file /usr/lib*/gconv/IBM850.so && echo "---Checks---" &>> /rpmbuild/iso_build.log'
+- docker exec $CID /bin/sh -c 'echo $(echo "---Checks---" ; rpm -qa | grep glibc ; rpm -qa | grep mtools ; file /usr/lib*/gconv/IBM850.so ; echo "---Checks---") 2>&1 | tee -a /rpmbuild/iso_build.log'
 - mkdir -p ${TASK_NAME}
 - export LIVE_LOG=$(readlink -f ./*.log)
 - if [ "$TRAVIS_TEST_RESULT" == "1" ]; then mv $LIVE_LOG ./${TASK_NAME}/FAILED_BUILD.log && rsync -arz --progress --rsh=ssh -e "ssh -o StrictHostKeyChecking=no" ./${TASK_NAME} foobar2:public_html/pub/isos/; travis restart -r unity-linux/buildunity; exit 1; fi
