@@ -12,6 +12,7 @@ before_install:
 - ssh-add /tmp/stuff/.deploy
 - mv /tmp/stuff/.host ~/.ssh/config
 - gem install travis
+- echo "y" | sh /tmp/stuff/.travis_login
 env:
 - TASK_FULL="task-unity-lxqt-live-i586"
 - TASK_FULL="task-unity-lxqt-live-x86_64"
